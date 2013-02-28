@@ -1,0 +1,74 @@
+#!/usr/bin/python2
+
+#infoconfig
+#Original author: Russell Harmon ( russ@csh.rit.edu, rus.har.mn )
+#Current maintainer: Josh McSavaney ( mcsaucy@csh.rit.edu )
+#A script for configuring various parameters of the BetaBrite sign
+
+import sys, datetime
+from BetaBrite import *
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("-a", "--address", action="store", dest="address", type="string", help="The address of the board to send to. 00 is broadcast.")
+parser.add_option("-t", "--time", action="store_true", dest="dateTime", default=False, help="Set the date and time using your system time.")
+parser.add_option("-r", "--reset", action="store_true", dest="softReset", default=False, help="Reset the device")
+parser.add_option("-c", "--clear-memory", action="store_true", dest="clearMemConfig", default=False, help="Clear the memory configuration")
+parser.add_option("-s", "--start-time",
+	action="store", dest="start_time", type="string",
+	help="The time to start displaying the text.")
+parser.add_option("-S", "--stop-time",
+	action="store", dest="stop_time", type="string", default="NO TIMES",
+	help="""The time to stop displaying the text.
+The available times are:
+[ALL DAY]
+[NO TIMES]
+[ALL TIMES]
+[DAILY]
+[SUNDAY]
+[MONDAY]
+[TUESDAY]
+[WEDNESDAY]
+[THURSDAY]
+[FRIDAY]
+[SATURDAY]
+[MONDAY-FRIDAY]
+[WEEKENDS]
+[ALL DAYS]
+[NO DAYS]""")
+parser.add_option("-l", "--label",
+	action="store", dest="label", type="string",
+	help="The label to use (where applicable)")
+
+
+(options, args) = parser.parse_args()
+
+if options.softReset:
+	print "Preforming soft reset"
+	softReset()
+	sys.exit(0)
+
+if options.clearMemConfig:
+	print "Clearing memory config"
+	clearMemoryConfig()
+	sys.exit(0)
+
+if not options.address:
+	startPacket()
+else:
+	startPacket( address = options.address )
+
+startSpecialFunction()
+
+if options.dateTime:
+	print "DateTime"
+	setDateTime( datetime.datetime.now() )
+
+if options.start_time and options.stop_time:
+	print options.start_time
+	print options.stop_time
+	setRunTime( options.label, options.start_time, options.stop_time ) 
+
+endSpecialFunction()
+
+endPacket()
